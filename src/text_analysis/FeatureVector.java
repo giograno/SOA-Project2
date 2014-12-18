@@ -61,11 +61,19 @@ public class FeatureVector {
 			while (tokenStream.incrementToken()) {
 				String string = charTermAttribute.toString();
 				// Here we do stemming
-				sBuilder.append(Stemmer.stem(string) + " ");
-				
-				// Fill the HashMap
-				
-				wordCountDocument++;
+				// sBuilder.append(Stemmer.stem(string) + " ");
+				string = Stemmer.stem(string);
+				if (WordNetUtilities.isInVocabulary(string)) {
+					sBuilder.append(string + " ");
+
+					// Fill the HashMap
+					if(termFrequency.containsKey(string)){
+						termFrequency.put(string, termFrequency.get(string)+1);
+					}else{
+						termFrequency.put(string, 1);
+					}
+					wordCountDocument++;
+				}
 			}
 			tokenStream.close();
 		} catch (IOException e) {
@@ -73,6 +81,10 @@ public class FeatureVector {
 		}
 
 		return sBuilder.toString();
+	}
+	
+	public Map<String, Integer> getTermFrequency(){
+		return this.termFrequency;
 	}
 
 }
