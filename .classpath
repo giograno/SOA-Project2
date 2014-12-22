@@ -25,5 +25,7 @@
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/snowball.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/weka.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/Tagger/lib/stanford-postagger-2011-04-20.jar"/>
+	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/jwi-2.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

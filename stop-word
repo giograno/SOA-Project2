@@ -89,6 +89,7 @@ brief
 briefly
 but
 by
+bs
 c
 ca
 came
@@ -108,6 +109,7 @@ containing
 contains
 could
 couldnt
+cs
 d
 date
 did
@@ -122,6 +124,7 @@ don't
 down
 downwards
 due
+ds
 during
 e
 each
@@ -137,6 +140,7 @@ elsewhere
 end
 ending
 enough
+es
 especially
 et
 et-al
@@ -168,6 +172,7 @@ forth
 found
 four
 from
+fs
 further
 furthermore
 g
@@ -184,6 +189,7 @@ goes
 gone
 got
 gotten
+gs
 h
 had
 happens
@@ -216,6 +222,7 @@ home
 how
 howbeit
 however
+hs
 hundred
 i
 id
@@ -233,6 +240,7 @@ indeed
 index
 information
 instead
+int
 into
 invention
 inward
@@ -245,6 +253,7 @@ its
 itself
 i've
 j
+js
 just
 k
 keep
@@ -256,6 +265,7 @@ km
 know
 known
 knows
+ks
 l
 largely
 last
@@ -277,6 +287,7 @@ little
 look
 looking
 looks
+ls
 ltd
 m
 made
@@ -303,6 +314,7 @@ most
 mostly
 mr
 mrs
+ms
 much
 mug
 must
@@ -341,6 +353,7 @@ noted
 nothing
 now
 nowhere
+ns
 o
 obtain
 obtained
@@ -361,6 +374,7 @@ only
 onto
 or
 ord
+os
 other
 others
 otherwise
@@ -399,8 +413,10 @@ probably
 promptly
 proud
 provides
+ps
 put
 q
+qs
 que
 quickly
 quite
@@ -427,6 +443,7 @@ resulted
 resulting
 results
 right
+rs
 run
 s
 said
@@ -485,6 +502,7 @@ specifically
 specified
 specify
 specifying
+ss
 state
 states
 still
@@ -653,8 +671,10 @@ words
 world
 would
 wouldn't
+ws
 www
 x
+xs
 y
 yes
 yet
@@ -667,8 +687,11 @@ yours
 yourself
 yourselves
 you've
+ys
 z
 zero
+zs
+0
 1
 2
 3
@@ -678,4 +701,3 @@ zero
 7
 8
 9
-0

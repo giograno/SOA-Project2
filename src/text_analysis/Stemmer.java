@@ -5,8 +5,9 @@ import org.tartarus.snowball.ext.EnglishStemmer;
 public class Stemmer {
 
 	/**
-	 * Perform stemming of a word; control also the word obtained after stemming
-	 * looking for it in WordNet vocabulary
+	 * Perform stemming of given a word. Control also the word obtained after
+	 * stemming looking for it in WordNet vocabulary; if the result of stemming
+	 * is not correct, try to look for most similar word
 	 * 
 	 * @param pString
 	 *            word to stem
@@ -16,10 +17,11 @@ public class Stemmer {
 		EnglishStemmer stemmer = new EnglishStemmer();
 		stemmer.setCurrent(pString);
 		stemmer.stem();
-		if (WordNetUtilities.isInVocabulary(stemmer.getCurrent())) {
-			return stemmer.getCurrent();
-		} else {
+		String stemmedWord = stemmer.getCurrent();
+
+		if (WordNetUtilities.isInVocabulary(stemmedWord))
+			return stemmedWord;
+		else
 			return pString;
-		}
 	}
 }
