@@ -10,9 +10,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LetterTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
-import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.pdfbox.cos.COSDocument;
@@ -24,15 +22,13 @@ public class PDFExtractor {
 	private static final String STOP_WORDS = "stop-word";
 
 	/**
-	 * Extract text from a PDF File
-	 * 
-	 * @param pDocument
-	 *            PDF File
-	 * @return a String which contains text extracted
+	 * Extract text from PDF file
+	 * @param pDocument PDF file
+	 * @return a String which contains text
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public static String extractTextFromPDFDocument(File pDocument) {
+	public static String extractTextFromPDFDocument(File pDocument)
+			throws IOException {
 		PDFTextStripper pdfTextStripper = null;
 		PDDocument pdDocument = null;
 		COSDocument cosDocument = null;
@@ -52,11 +48,16 @@ public class PDFExtractor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		return extractText;
+
+		return processingText(extractText);
 	}
 
-	public static String processingText(String document) throws IOException {
+	/**
+	 * Perform stop word removing and tokenization on text extracted
+	 * @param document
+	 * @return
+	 */
+	private static String processingText(String document) {
 		StringBuilder sBuilder = new StringBuilder();
 		try {
 			List<String> stopWords = FileUtils.readLines(new File(STOP_WORDS));

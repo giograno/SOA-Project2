@@ -69,11 +69,14 @@ public class TextPreProcesser {
 			tokenStream.reset();
 			while (tokenStream.incrementToken()) {
 				String string = charTermAttribute.toString();
-								
+
+				//commentare riga 77 per utilizzare lo stemmer di JWI
+				//commentare riga 76 per utilizzare Snowball
+				
 				String stemmedWord = getStem(stemmer, string);
+//				String stemmedWord = Stemmer.stem(string);
 
 				sBuilder.append(stemmedWord + " ");
-				
 
 				if (termFrequency.containsKey(stemmedWord)) {
 					termFrequency.put(stemmedWord,
@@ -81,7 +84,6 @@ public class TextPreProcesser {
 				} else {
 					termFrequency.put(stemmedWord, 1);
 				}
-				// }
 			}
 			tokenStream.close();
 		} catch (IOException e) {
@@ -102,8 +104,8 @@ public class TextPreProcesser {
 	 * @return stemmed word or same input word
 	 */
 	private String getStem(WordnetStemmer stemmer, String aString) {
-		List<String> possibleStems = stemmer.findStems(aString, null);;
-	
+		List<String> possibleStems = stemmer.findStems(aString, null);
+
 		if (!possibleStems.isEmpty()) {
 			return possibleStems.get(0);
 		} else {
@@ -114,25 +116,25 @@ public class TextPreProcesser {
 	public Map<String, Integer> getTermFrequency() {
 		return sortByValues(this.termFrequency);
 	}
-	
-	private HashMap sortByValues(Map map) { 
-	       List list = new LinkedList(map.entrySet());
-	       // Defined Custom Comparator here
-		Collections.sort(list, new Comparator() {
-	            public int compare(Object o1, Object o2) {
-	               return ((Comparable) ((Map.Entry) (o1)).getValue())
-	                  .compareTo(((Map.Entry) (o2)).getValue());
-	            }
-	       });
 
-	       // Here I am copying the sorted list in HashMap
-	       // using LinkedHashMap to preserve the insertion order
-	       HashMap sortedHashMap = new LinkedHashMap();
-	       for (Iterator it = list.iterator(); it.hasNext();) {
-	              Map.Entry entry = (Map.Entry) it.next();
-	              sortedHashMap.put(entry.getKey(), entry.getValue());
-	       } 
-	       return sortedHashMap;
-	  }
+	private HashMap sortByValues(Map map) {
+		List list = new LinkedList(map.entrySet());
+		// Defined Custom Comparator here
+		Collections.sort(list, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Comparable) ((Map.Entry) (o1)).getValue())
+						.compareTo(((Map.Entry) (o2)).getValue());
+			}
+		});
+
+		// Here I am copying the sorted list in HashMap
+		// using LinkedHashMap to preserve the insertion order
+		HashMap sortedHashMap = new LinkedHashMap();
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			sortedHashMap.put(entry.getKey(), entry.getValue());
+		}
+		return sortedHashMap;
+	}
 
 }

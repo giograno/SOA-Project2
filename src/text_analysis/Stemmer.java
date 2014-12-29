@@ -19,9 +19,10 @@ public class Stemmer {
 		stemmer.stem();
 		String stemmedWord = stemmer.getCurrent();
 
-		if (WordNetUtilities.isInVocabulary(stemmedWord))
-			return stemmedWord;
-		else
-			return pString;
+		return stemmedWord;
+//		if (WordNetUtilities.isInVocabulary(stemmedWord))
+//			return stemmedWord;
+//		else
+//			return pString;
 	}
 }
