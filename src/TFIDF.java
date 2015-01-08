@@ -1,6 +1,10 @@
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,23 +12,24 @@ import java.util.Map;
 
 import pdf_extractor.PDFExtractor;
 
-public class TFIDF {
+public class TFIDF implements DocumentFeatures {
 
 	private String input_directory_path;
 	private String output_file_path;
+	private final String INTERMEDIATE_DIR_PATH = "intermediate_document_vectors";
 
 	public TFIDF(String input_directory_path, String output_file_path) {
 		this.input_directory_path = input_directory_path;
 		this.output_file_path = output_file_path;
 	}
 
-	public void extractFeatures() throws IOException {
+	public void extractFeatures() {
 		// da sostituire con scrittura su disco
 		List<DocumentVector> vectorList = new ArrayList<DocumentVector>();
 		FeaturesExtractor featuresVector = null;
 
 		/* FilenameFilter for PDF to prevent strange errors */
-		File[] files = new File(this.input_directory_path)
+		File[] input_files = new File(this.input_directory_path)
 				.listFiles(new FilenameFilter() {
 					public boolean accept(File dir, String name) {
 						if (name.endsWith(".pdf"))
@@ -39,35 +44,81 @@ public class TFIDF {
 		// Total number of document to analyze
 		int documentInCorpus = 0;
 
-		for (File file : files) {
-			nameDocument = file.getName();
+		/* FASE 1: scrittura classi serializzabili */
+		DocumentVector documentVector = null;
+		for (File file : input_files) {
+			nameDocument = file.getName().substring(0,
+					file.getName().length() - 4);
+			System.out.println(nameDocument);
 			featuresVector = new FeaturesExtractor(nameDocument);
-			vectorList.add(featuresVector.getDocumentVector(PDFExtractor
-					.extractTextFromPDFDocument(file)));
+			try {
+				documentVector = featuresVector.getDocumentVector(PDFExtractor
+						.extractTextFromPDFDocument(file));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			/* per farlo ancora funzionare */
+			vectorList.add(documentVector);
+			/* fine */
+
+			try {
+				FileOutputStream fileOutputStream = new FileOutputStream(
+						INTERMEDIATE_DIR_PATH + "/" + nameDocument + ".ser");
+				ObjectOutputStream outputStream = new ObjectOutputStream(
+						fileOutputStream);
+				outputStream.writeObject(documentVector);
+				outputStream.close();
+				fileOutputStream.close();
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
 			documentInCorpus++;
 		}
 		Map<String, Double> termFrequencyInverseDocumentFrequency;
 		Map<String, Integer> termFrequency;
 		int numberOfWordInDocument;
-		
-		DocumentVector documentVector;
-		for (int i = 0; i < documentInCorpus; i++) {
+
+		/* FilenameFilter for .ser to prevent strange errors */
+		File[] temporary_files = new File(INTERMEDIATE_DIR_PATH)
+				.listFiles(new FilenameFilter() {
+					public boolean accept(File dir, String name) {
+						if (name.endsWith(".ser"))
+							return true;
+						else
+							return false;
+					}
+				});
+
+		DocumentVector documentVector2 = null;
+		int i = 1;
+		for (File file : temporary_files) {
+
+			try {
+				FileInputStream fileInputStream = new FileInputStream(file);
+				ObjectInputStream inputStream = new ObjectInputStream(
+						fileInputStream);
+				documentVector2 = (DocumentVector) inputStream.readObject();
+				inputStream.close();
+				fileInputStream.close();
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				System.err.println("DocumentVector class not found!");
+				e.printStackTrace();
+			}
+
 			termFrequencyInverseDocumentFrequency = new HashMap<>();
-			termFrequency = vectorList.get(i).getTermFrequency();
-			numberOfWordInDocument = vectorList.get(i)
+			termFrequency = documentVector2.getTermFrequency();
+			numberOfWordInDocument = documentVector2
 					.getNumberOfWordInDocument();
 
-			/* ciclo su tutte le parole della term frequency map */
 			for (String string : termFrequency.keySet()) {
-
-				// tf: n/N
 				double tf = (double) termFrequency.get(string)
 						/ (double) numberOfWordInDocument;
-				// idf: d/D
 				double idf = (double) documentInCorpus
 						/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
 								.get(string);
-				// tfidf: tf * log(idf)
 				double tfidf = tf * Math.log10(idf);
 				termFrequencyInverseDocumentFrequency.put(string, tfidf);
 			}
@@ -78,6 +129,6 @@ public class TFIDF {
 						+ termFrequencyInverseDocumentFrequency.get(string));
 			}
 		}
-	}// fine extractFeatures
+	}
 
 }

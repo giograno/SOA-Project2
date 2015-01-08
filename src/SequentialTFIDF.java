@@ -36,10 +36,14 @@ public class SequentialTFIDF {
 		/*
 		 * input-files: for real data tfidf: small dummy test data
 		 */
-		final String INPUT_DIR = "input-files";
+		final String INPUT_DIR = "tfidf";
 		final String FEATURE_OUTPUT = "features-vectors";
 
-		TFIDF tfidf = new TFIDF(INPUT_DIR, FEATURE_OUTPUT);
-		tfidf.extractFeatures();
+		DocumentFeatures documentFeatures = new TFIDF(INPUT_DIR, FEATURE_OUTPUT); ;
+		
+//		TFIDF tfidf = new TFIDF(INPUT_DIR, FEATURE_OUTPUT);
+//		tfidf.extractFeatures();
+		
+		documentFeatures.extractFeatures();
 	}
 }
