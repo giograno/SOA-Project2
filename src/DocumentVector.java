@@ -1,11 +1,14 @@
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class DocumentVector {
-
+public class DocumentVector implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String name;
-	private int numberOfWordInDocument; // N
+	private int numberOfWordInDocument;
 	private Map<String, Integer> termFrequency = new HashMap<String, Integer>();
 
 	public DocumentVector(String name, int numberOfWordInDocument,
