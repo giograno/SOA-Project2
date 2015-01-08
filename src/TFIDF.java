@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pdf_extractor.PDFExtractor;
-
 public class TFIDF implements DocumentFeatures {
 
 	private String input_directory_path;

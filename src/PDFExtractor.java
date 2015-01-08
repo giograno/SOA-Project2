@@ -1,4 +1,4 @@
-package pdf_extractor;
+
 
 import java.io.File;
 import java.io.FileInputStream;
