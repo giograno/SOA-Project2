@@ -23,7 +23,9 @@ public class PDFExtractor {
 
 	/**
 	 * Extract text from PDF file
-	 * @param pDocument PDF file
+	 * 
+	 * @param pDocument
+	 *            PDF file
 	 * @return a String which contains text
 	 * @throws IOException
 	 */
@@ -54,6 +56,7 @@ public class PDFExtractor {
 
 	/**
 	 * Perform stop word removing and tokenization on text extracted
+	 * 
 	 * @param document
 	 * @return
 	 */

@@ -1,4 +1,4 @@
-package text_analysis;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,6 @@ import org.apache.lucene.analysis.util.CharArraySet;
 import edu.mit.jwi.IDictionary;
 import edu.mit.jwi.item.POS;
 import edu.mit.jwi.morph.WordnetStemmer;
-import posTagger.POSutils;
 
 public class TextPreProcesser {
 	private String pdfTitle;
