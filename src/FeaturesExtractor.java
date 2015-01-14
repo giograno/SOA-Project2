@@ -70,7 +70,7 @@ public class FeaturesExtractor {
 		IDictionary dict = new edu.mit.jwi.Dictionary(url);
 		dict.open();
 		WordnetStemmer stemmer = new WordnetStemmer(dict);
-
+		
 		document = tagText(document);
 
 		String[] splittedDocument = document.split(" ");
@@ -128,6 +128,7 @@ public class FeaturesExtractor {
 		featuresVector.putAll(termFrequency);
 		featuresVector.putAll(synsetFrequency);
 
+		dict.close();
 		return new DocumentVector(documentName, totalNumberOfWordsInDocument,
 				featuresVector);
 	}

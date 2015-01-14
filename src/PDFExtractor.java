@@ -1,5 +1,4 @@
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,6 +51,22 @@ public class PDFExtractor {
 		}
 
 		return processingText(extractText);
+	}
+
+	public static String extractSecondVersion(File document) {
+
+		PDDocument pdDocument = null;
+		String parsedText = null;
+		PDFTextStripper stripper;
+
+		try {
+			pdDocument = PDDocument.load(document);
+			stripper = new PDFTextStripper();
+			parsedText = stripper.getText(pdDocument);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return parsedText;
 	}
 
 	/**

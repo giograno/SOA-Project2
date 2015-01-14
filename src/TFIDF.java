@@ -1,6 +1,8 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
 public class TFIDF implements DocumentFeatures {
 
 	private String input_directory_path;
@@ -18,7 +22,18 @@ public class TFIDF implements DocumentFeatures {
 
 	public TFIDF(String input_directory_path, String output_file_path) {
 		this.input_directory_path = input_directory_path;
-		this.output_file_path = output_file_path;
+		this.output_file_path = output_file_path + "/output.txt";
+		File file = new File(this.INTERMEDIATE_DIR_PATH);
+		try {
+			if (file.isDirectory()) {
+				FileUtils.cleanDirectory(file);
+			} else {
+				FileUtils.forceMkdir(file);
+			}
+		} catch (IOException e) {
+			System.err.println();
+			e.printStackTrace();
+		}
 	}
 
 	public void extractFeatures() {
@@ -47,7 +62,7 @@ public class TFIDF implements DocumentFeatures {
 		for (File file : input_files) {
 			nameDocument = file.getName().substring(0,
 					file.getName().length() - 4);
-			System.out.println(nameDocument);
+			System.out.println("Extraction from: " + nameDocument);
 			featuresVector = new FeaturesExtractor(nameDocument);
 			try {
 				documentVector = featuresVector.getDocumentVector(PDFExtractor
@@ -121,12 +136,42 @@ public class TFIDF implements DocumentFeatures {
 				termFrequencyInverseDocumentFrequency.put(string, tfidf);
 			}
 
-			System.out.println("Stampa matrice numero: " + (i + 1));
-			for (String string : termFrequencyInverseDocumentFrequency.keySet()) {
-				System.out.println("key: " + string + ", value: "
-						+ termFrequencyInverseDocumentFrequency.get(string));
+			// System.out.println("Stampa matrice numero: " + (i + 1));
+			// for (String string :
+			// termFrequencyInverseDocumentFrequency.keySet()) {
+			// System.out.println("key: " + string + ", value: "
+			// + termFrequencyInverseDocumentFrequency.get(string));
+			// }
+			// Get the map size
+
+			/* write on file */
+			/* documentID@documentName, word:value;word2:value2;...; */
+			try {
+				File outputFile = new File(this.output_file_path);
+				if (!file.exists()) {
+					outputFile.createNewFile();
+				}
+				FileWriter fileWriter = new FileWriter(outputFile, true);
+
+				String recordToWrite = "doc#" + i + "@"
+						+ documentVector2.getName() + ";";
+				for (String record : termFrequencyInverseDocumentFrequency
+						.keySet()) {
+					recordToWrite += record + ":"
+							+ termFrequencyInverseDocumentFrequency.get(record)
+							+ ";";
+				}
+				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+				bufferedWriter.write(recordToWrite);
+				bufferedWriter.write("\n");
+				bufferedWriter.close();
+				i++;
+				System.out
+						.println("Ok! Successfully appended entire vector!\nYou are the best my friend!");
+			} catch (IOException e) {
+				System.err.println("AHAHAH I think there is a problem!");
+				e.printStackTrace();
 			}
 		}
 	}
-
 }
