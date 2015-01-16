@@ -3,16 +3,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
+import utils.Utils;
 
 public class TFIDF implements DocumentFeatures {
 
@@ -23,34 +20,13 @@ public class TFIDF implements DocumentFeatures {
 	public TFIDF(String input_directory_path, String output_file_path) {
 		this.input_directory_path = input_directory_path;
 		this.output_file_path = output_file_path + "/output.txt";
-		File file = new File(this.INTERMEDIATE_DIR_PATH);
-		try {
-			if (file.isDirectory()) {
-				FileUtils.cleanDirectory(file);
-			} else {
-				FileUtils.forceMkdir(file);
-			}
-		} catch (IOException e) {
-			System.err.println();
-			e.printStackTrace();
-		}
+		Utils.cleanOrCreateDirectory(this.INTERMEDIATE_DIR_PATH);
 	}
 
 	public void extractFeatures() {
-		// da sostituire con scrittura su disco
-		List<DocumentVector> vectorList = new ArrayList<DocumentVector>();
 		FeaturesExtractor featuresVector = null;
 
-		/* FilenameFilter for PDF to prevent strange errors */
-		File[] input_files = new File(this.input_directory_path)
-				.listFiles(new FilenameFilter() {
-					public boolean accept(File dir, String name) {
-						if (name.endsWith(".pdf"))
-							return true;
-						else
-							return false;
-					}
-				});
+		File[] input_files = Utils.listPDFinDirectory(input_directory_path);
 
 		// Name of current document in analysis
 		String nameDocument;
@@ -71,10 +47,6 @@ public class TFIDF implements DocumentFeatures {
 				e.printStackTrace();
 			}
 
-			/* per farlo ancora funzionare */
-			vectorList.add(documentVector);
-			/* fine */
-
 			try {
 				FileOutputStream fileOutputStream = new FileOutputStream(
 						INTERMEDIATE_DIR_PATH + "/" + nameDocument + ".ser");
@@ -92,18 +64,8 @@ public class TFIDF implements DocumentFeatures {
 		Map<String, Integer> termFrequency;
 		int numberOfWordInDocument;
 
-		/* FilenameFilter for .ser to prevent strange errors */
-		File[] temporary_files = new File(INTERMEDIATE_DIR_PATH)
-				.listFiles(new FilenameFilter() {
-					public boolean accept(File dir, String name) {
-						if (name.endsWith(".ser"))
-							return true;
-						else
-							return false;
-					}
-				});
-
-		DocumentVector documentVector2 = null;
+		File[] temporary_files = Utils.listSerializedInDirectory(INTERMEDIATE_DIR_PATH);
+		
 		int i = 1;
 		for (File file : temporary_files) {
 
@@ -111,7 +73,7 @@ public class TFIDF implements DocumentFeatures {
 				FileInputStream fileInputStream = new FileInputStream(file);
 				ObjectInputStream inputStream = new ObjectInputStream(
 						fileInputStream);
-				documentVector2 = (DocumentVector) inputStream.readObject();
+				documentVector = (DocumentVector) inputStream.readObject();
 				inputStream.close();
 				fileInputStream.close();
 			} catch (IOException exception) {
@@ -122,11 +84,11 @@ public class TFIDF implements DocumentFeatures {
 			}
 
 			termFrequencyInverseDocumentFrequency = new HashMap<>();
-			termFrequency = documentVector2.getTermFrequency();
-			numberOfWordInDocument = documentVector2
-					.getNumberOfWordInDocument();
+			termFrequency = documentVector.getTermFrequency();
+			numberOfWordInDocument = documentVector.getNumberOfWordInDocument();
 
 			for (String string : termFrequency.keySet()) {
+				System.out.println(string + ": " + termFrequency.get(string));
 				double tf = (double) termFrequency.get(string)
 						/ (double) numberOfWordInDocument;
 				double idf = (double) documentInCorpus
@@ -136,16 +98,6 @@ public class TFIDF implements DocumentFeatures {
 				termFrequencyInverseDocumentFrequency.put(string, tfidf);
 			}
 
-			// System.out.println("Stampa matrice numero: " + (i + 1));
-			// for (String string :
-			// termFrequencyInverseDocumentFrequency.keySet()) {
-			// System.out.println("key: " + string + ", value: "
-			// + termFrequencyInverseDocumentFrequency.get(string));
-			// }
-			// Get the map size
-
-			/* write on file */
-			/* documentID@documentName, word:value;word2:value2;...; */
 			try {
 				File outputFile = new File(this.output_file_path);
 				if (!file.exists()) {
@@ -154,7 +106,7 @@ public class TFIDF implements DocumentFeatures {
 				FileWriter fileWriter = new FileWriter(outputFile, true);
 
 				String recordToWrite = "doc#" + i + "@"
-						+ documentVector2.getName() + ";";
+						+ documentVector.getName() + ";";
 				for (String record : termFrequencyInverseDocumentFrequency
 						.keySet()) {
 					recordToWrite += record + ":"
@@ -166,10 +118,8 @@ public class TFIDF implements DocumentFeatures {
 				bufferedWriter.write("\n");
 				bufferedWriter.close();
 				i++;
-				System.out
-						.println("Ok! Successfully appended entire vector!\nYou are the best my friend!");
 			} catch (IOException e) {
-				System.err.println("AHAHAH I think there is a problem!");
+				System.err.println("You have a problem on saving files!");
 				e.printStackTrace();
 			}
 		}

@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,10 +8,10 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LetterTokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
-import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -32,18 +31,15 @@ public class PDFExtractor {
 			throws IOException {
 		PDFTextStripper pdfTextStripper = null;
 		PDDocument pdDocument = null;
-		COSDocument cosDocument = null;
 		String extractText = null;
 
 		try {
 			PDFParser parser = new PDFParser(new FileInputStream(pDocument));
 			parser.parse();
-			cosDocument = parser.getDocument();
+			pdDocument = parser.getPDDocument();
 			pdfTextStripper = new PDFTextStripper();
-			pdDocument = new PDDocument(cosDocument);
 			extractText = pdfTextStripper.getText(pdDocument);
 			pdDocument.close();
-			cosDocument.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -51,22 +47,6 @@ public class PDFExtractor {
 		}
 
 		return processingText(extractText);
-	}
-
-	public static String extractSecondVersion(File document) {
-
-		PDDocument pdDocument = null;
-		String parsedText = null;
-		PDFTextStripper stripper;
-
-		try {
-			pdDocument = PDDocument.load(document);
-			stripper = new PDFTextStripper();
-			parsedText = stripper.getText(pdDocument);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return parsedText;
 	}
 
 	/**
@@ -84,6 +64,7 @@ public class PDFExtractor {
 			TokenStream tokenStream = new LetterTokenizer(new StringReader(
 					document.trim()));
 			tokenStream = new StopFilter(tokenStream, stopWSet);
+//			tokenStream = new LowerCaseFilter(tokenStream);
 
 			CharTermAttribute charTermAttribute = tokenStream
 					.addAttribute(CharTermAttribute.class);

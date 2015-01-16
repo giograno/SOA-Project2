@@ -1,5 +1,4 @@
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -69,11 +68,7 @@ public class TextPreProcesser {
 			while (tokenStream.incrementToken()) {
 				String string = charTermAttribute.toString();
 
-				//commentare riga 77 per utilizzare lo stemmer di JWI
-				//commentare riga 76 per utilizzare Snowball
-				
 				String stemmedWord = getStem(stemmer, string);
-//				String stemmedWord = Stemmer.stem(string);
 
 				sBuilder.append(stemmedWord + " ");
 
