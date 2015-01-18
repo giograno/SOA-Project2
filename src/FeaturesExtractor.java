@@ -32,93 +32,97 @@ public class FeaturesExtractor {
 	private int totalNumberOfWordsInDocument = 0;
 
 	private Morphology morphology = new Morphology();
+	private MaxentTagger tagger;
+	private final String WORDNET_PATH = "Wordnet-3/dict";
 
 	private Map<String, Integer> termFrequency = new HashMap<>();
-	private Map<String, Integer> synsetFrequency = new HashMap<>();
-	private Map<String, Integer> featuresVector = new HashMap<>();
+//	private Map<String, Integer> synsetFrequency = new HashMap<>();
+//	private Map<String, Integer> featuresVector = new HashMap<>();
 
-	/* Store POS Tag needed for stemming */
-	private Map<String, String> partOfSpeechMap = new HashMap<>();
+//	private Map<String, String> partOfSpeechMap = new HashMap<>();
 
-	public FeaturesExtractor(String pDocumentName) {
+	public FeaturesExtractor(String pDocumentName, MaxentTagger tagger) {
+
 		stopwords = new HashSet<String>(s_stopwords.length);
 		for (String stopWord : s_stopwords) {
 			stopwords.add(stopWord);
 		}
 		this.documentName = pDocumentName;
+		this.tagger = tagger;
 	}
 
-	public DocumentVector getDocumentVector(String document) throws IOException {
-
-		String localPath = "Wordnet-3/dict";
-		URL url = new URL("file", null, localPath);
-
-		IDictionary dict = new edu.mit.jwi.Dictionary(url);
-		dict.open();
-		WordnetStemmer stemmer = new WordnetStemmer(dict);
-
-		document = tagText(document);
-
-		String[] splittedDocument = document.split(" ");
-
-		WordTag wordWithTag;
-		String originalWord, pos;
-
-		for (int i = 0; i < splittedDocument.length; i++) {
-			String[] temp = splittedDocument[i].split("/");
-			originalWord = temp[0].toLowerCase();
-			pos = temp[1];
-
-			if (!isStopWord(pos) && isAscii(originalWord)) {
-
-				// this is the word tag (String word, String tag)
-				wordWithTag = getStem(stemmer, originalWord, pos);
-
-				WordLemmaTag lemma = morphology.lemmatize(wordWithTag);
-				if (!lemma.value().equalsIgnoreCase("be")
-						&& !lemma.value().equalsIgnoreCase("have")) {
-					String stemmedWord = lemma.lemma().toLowerCase();
-
-					// Store word with relative POS tag
-					storePOS(stemmedWord, pos);
-
-					// also increment document
-					if (termFrequency.containsKey(stemmedWord)) {
-						termFrequency.put(stemmedWord,
-								termFrequency.get(stemmedWord) + 1);
-						totalNumberOfWordsInDocument++;
-					} else {
-						termFrequency.put(stemmedWord, 1);
-						totalNumberOfWordsInDocument++;
-
-						NumberOfDocumentsWhereWordAppears
-								.updateNumberOfDocumentsWhereWordAppears(stemmedWord);
-					}
-				}
-			}
-		}
-
-		if (Properties.CUT_ON_FREQUENCY) {
-			int threshold = (int) Math.round(Properties.LOWER_LIMIT
-					* totalNumberOfWordsInDocument / 100);
-			for (Iterator<Map.Entry<String, Integer>> iterator = this.termFrequency
-					.entrySet().iterator(); iterator.hasNext();) {
-				Map.Entry<String, Integer> entry = iterator.next();
-
-				if (entry.getValue() < threshold) {
-					iterator.remove();
-				}
-			}
-		}
-		this.addConceptVector(dict);
-
-		featuresVector.putAll(termFrequency);
-		featuresVector.putAll(synsetFrequency);
-		
-		dict.close();
-		return new DocumentVector(documentName, totalNumberOfWordsInDocument,
-				featuresVector);
-	}
+	// public DocumentVector getDocumentVector(String document) throws
+	// IOException {
+	//
+	// String localPath = "Wordnet-3/dict";
+	// URL url = new URL("file", null, localPath);
+	//
+	// IDictionary dict = new edu.mit.jwi.Dictionary(url);
+	// dict.open();
+	// WordnetStemmer stemmer = new WordnetStemmer(dict);
+	//
+	// document = tagText(document);
+	//
+	// String[] splittedDocument = document.split(" ");
+	//
+	// WordTag wordWithTag;
+	// String originalWord, pos;
+	//
+	// for (int i = 0; i < splittedDocument.length; i++) {
+	// String[] temp = splittedDocument[i].split("/");
+	// originalWord = temp[0].toLowerCase();
+	// pos = temp[1];
+	//
+	// if (!isStopWord(pos) && isAscii(originalWord)) {
+	//
+	// // this is the word tag (String word, String tag)
+	// wordWithTag = getStem(stemmer, originalWord, pos);
+	//
+	// WordLemmaTag lemma = morphology.lemmatize(wordWithTag);
+	// if (!lemma.value().equalsIgnoreCase("be")
+	// && !lemma.value().equalsIgnoreCase("have")) {
+	// String stemmedWord = lemma.lemma().toLowerCase();
+	//
+	// // Store word with relative POS tag
+	// storePOS(stemmedWord, pos);
+	//
+	// // also increment document
+	// if (termFrequency.containsKey(stemmedWord)) {
+	// termFrequency.put(stemmedWord,
+	// termFrequency.get(stemmedWord) + 1);
+	// totalNumberOfWordsInDocument++;
+	// } else {
+	// termFrequency.put(stemmedWord, 1);
+	// totalNumberOfWordsInDocument++;
+	//
+	// NumberOfDocumentsWhereWordAppears
+	// .updateNumberOfDocumentsWhereWordAppears(stemmedWord);
+	// }
+	// }
+	// }
+	// }
+	//
+	// if (Properties.CUT_ON_FREQUENCY) {
+	// int threshold = (int) Math.round(Properties.LOWER_LIMIT
+	// * totalNumberOfWordsInDocument / 100);
+	// for (Iterator<Map.Entry<String, Integer>> iterator = this.termFrequency
+	// .entrySet().iterator(); iterator.hasNext();) {
+	// Map.Entry<String, Integer> entry = iterator.next();
+	//
+	// if (entry.getValue() < threshold) {
+	// iterator.remove();
+	// }
+	// }
+	// }
+	// this.addConceptVector(dict);
+	//
+	// featuresVector.putAll(termFrequency);
+	// featuresVector.putAll(synsetFrequency);
+	//
+	// dict.close();
+	// return new DocumentVector(documentName, totalNumberOfWordsInDocument,
+	// featuresVector);
+	// }
 
 	private boolean isAscii(String string) {
 		if (string == null) {
@@ -136,65 +140,59 @@ public class FeaturesExtractor {
 	public DocumentVector getDocumentVectorV2(String document)
 			throws IOException {
 
-		String localPath = "Wordnet-3/dict";
-		URL url = new URL("file", null, localPath);
-
+		URL url = new URL("file", null, WORDNET_PATH);
 		IDictionary dict = new edu.mit.jwi.Dictionary(url);
 		dict.open();
 
-		document = tagText(document);
+		document = tagger.tagString(document);
 
 		String[] splittedDocument = document.split(" ");
 
 		String originalWord, pos;
 
-		// rimuove le stopword e fa lo stemming del documento dato in input
 		for (int i = 0; i < splittedDocument.length; i++) {
-			if (!isStopWord(splittedDocument[i].split("/")[1])) {
+			String[] temp = splittedDocument[i].split("/");
+			originalWord = temp[0].toLowerCase();
+			pos = temp[1];
+
+			if (!isStopWord(pos)) {
 
 				pos = splittedDocument[i].split("/")[1];
 				originalWord = splittedDocument[i].split("/")[0].toLowerCase();
 
 				WordLemmaTag lemma = morphology.lemmatize(morphology.stem(
 						originalWord, pos));
-				if (!lemma.value().equalsIgnoreCase("be")
-						&& !lemma.value().equalsIgnoreCase("have")) {
-					String stemmedWord = lemma.lemma().toLowerCase();
 
-					// Store word with relative POS tag
-					// storePOS(stemmedWord, pos);
+				String stemmedWord = lemma.lemma().toLowerCase();
 
-					// also increment document
-					if (termFrequency.containsKey(stemmedWord)) {
-						termFrequency.put(stemmedWord,
-								termFrequency.get(stemmedWord) + 1);
-						totalNumberOfWordsInDocument++;
-					} else {
-						termFrequency.put(stemmedWord, 1);
-						totalNumberOfWordsInDocument++;
+				if (termFrequency.containsKey(stemmedWord)) {
+					termFrequency.put(stemmedWord,
+							termFrequency.get(stemmedWord) + 1);
+					totalNumberOfWordsInDocument++;
+				} else {
+					termFrequency.put(stemmedWord, 1);
+					totalNumberOfWordsInDocument++;
 
-						NumberOfDocumentsWhereWordAppears
-								.updateNumberOfDocumentsWhereWordAppears(stemmedWord);
-					}
-
-					// put concept vector
-					ArrayList<String> wordSynset = getSynset(dict,
-							originalWord, getPos(pos));
-					if (wordSynset != null) {
-						for (String string : wordSynset) {
-							if (this.termFrequency.containsKey(string)) {
-								this.termFrequency.put(string,
-										this.termFrequency.get(string) + 1);
-							} else {
-								this.synsetFrequency.put(string, 1);
-							}
-							totalNumberOfWordsInDocument++;
-							NumberOfDocumentsWhereWordAppears
-									.updateNumberOfDocumentsWhereWordAppears(string);
-						}
-					}
-
+					NumberOfDocumentsWhereWordAppears
+							.updateNumberOfDocumentsWhereWordAppears(stemmedWord);
 				}
+
+				ArrayList<String> wordSynset = getSynsets(dict, originalWord,
+						getPos(pos));
+				if (wordSynset != null) {
+					for (String string : wordSynset) {
+						if (this.termFrequency.containsKey(string)) {
+							this.termFrequency.put(string,
+									this.termFrequency.get(string) + 1);
+						} else {
+							this.termFrequency.put(string, 1);
+						}
+						totalNumberOfWordsInDocument++;
+						NumberOfDocumentsWhereWordAppears
+								.updateNumberOfDocumentsWhereWordAppears(string);
+					}
+				}
+
 			}
 		}
 
@@ -210,81 +208,71 @@ public class FeaturesExtractor {
 				}
 			}
 		}
-		// this.addConceptVector(dict);
-
-		// featuresVector.putAll(termFrequency);
-		// featuresVector.putAll(synsetFrequency);
 
 		dict.close();
 		return new DocumentVector(documentName, totalNumberOfWordsInDocument,
 				termFrequency);
 	}
 
-	private void storePOS(String pWord, String pPos) {
-		if (!partOfSpeechMap.containsKey(pWord)) {
-			partOfSpeechMap.put(pWord, pPos);
-		}
-	}
+	// private void storePOS(String pWord, String pPos) {
+	// if (!partOfSpeechMap.containsKey(pWord)) {
+	// partOfSpeechMap.put(pWord, pPos);
+	// }
+	// }
 
-	public void addConceptVector(IDictionary dictionary) {
-		ArrayList<String> wordSynset;
-		POS pos;
-		int frequency;
+//	public void addConceptVector(IDictionary dictionary) {
+//		ArrayList<String> wordSynset;
+//		POS pos;
+//		int frequency;
+//
+//		for (String word : this.termFrequency.keySet()) {
+//			pos = getPos(partOfSpeechMap.get(word));
+//			frequency = this.termFrequency.get(word);
+//			// We call private method getSynset
+//			wordSynset = getSynsets(dictionary, word, pos);
+//
+//			if (wordSynset != null) {
+//				for (String string : wordSynset) {
+//					if (this.synsetFrequency.containsKey(string)) {
+//						this.synsetFrequency.put(string,
+//								this.synsetFrequency.get(string) + frequency);
+//					} else {
+//						this.synsetFrequency.put(string, frequency);
+//					}
+//					// it is necessary increment total number of words in
+//					// document also for concept vectors?
+//					totalNumberOfWordsInDocument++;
+//					NumberOfDocumentsWhereWordAppears
+//							.updateNumberOfDocumentsWhereWordAppears(string);
+//				}
+//			}
+//		}
+//	}
 
-		for (String word : this.termFrequency.keySet()) {
-			pos = getPos(partOfSpeechMap.get(word));
-			frequency = this.termFrequency.get(word);
-			// We call private method getSynset
-			wordSynset = getSynset(dictionary, word, pos);
+	// private static String tagText(String stringToTag) {
+	// MaxentTagger tagger = null;
+	// try {
+	// tagger = new MaxentTagger("taggers/left3words-wsj-0-18.tagger");
+	// } catch (ClassNotFoundException | IOException e) {
+	// e.printStackTrace();
+	// }
+	// String stringTagged = tagger.tagString(stringToTag);
+	// return stringTagged;
+	// }
 
-			if (wordSynset != null) {
-				for (String string : wordSynset) {
-					if (this.synsetFrequency.containsKey(string)) {
-						this.synsetFrequency.put(string,
-								this.synsetFrequency.get(string) + frequency);
-					} else {
-						this.synsetFrequency.put(string, frequency);
-					}
-					// it is necessary increment total number of words in
-					// document also for concept vectors?
-					totalNumberOfWordsInDocument++;
-					NumberOfDocumentsWhereWordAppears
-							.updateNumberOfDocumentsWhereWordAppears(string);
-				}
-			}
-		}
-	}
+	// private WordTag getStem(WordnetStemmer stemmer, String word, String pos)
+	// {
+	// List<String> possibleStems = stemmer.findStems(word, getPos(pos));
+	//
+	// if (!possibleStems.isEmpty()) {
+	// String stemmedWord = possibleStems.get(0);
+	// return new WordTag(stemmedWord, pos);
+	// } else {
+	// return new WordTag(word, pos);
+	// }
+	// }
 
-	/**
-	 * This method apply POS tag to a given string
-	 * 
-	 * @param stringToTag
-	 *            string to tag
-	 * @return a String with POS tag applied
-	 */
-	private static String tagText(String stringToTag) {
-		MaxentTagger tagger = null;
-		try {
-			tagger = new MaxentTagger("taggers/left3words-wsj-0-18.tagger");
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-		}
-		String stringTagged = tagger.tagString(stringToTag);
-		return stringTagged;
-	}
-
-	private WordTag getStem(WordnetStemmer stemmer, String word, String pos) {
-		List<String> possibleStems = stemmer.findStems(word, getPos(pos));
-
-		if (!possibleStems.isEmpty()) {
-			String stemmedWord = possibleStems.get(0);
-			return new WordTag(stemmedWord, pos);
-		} else {
-			return new WordTag(word, pos);
-		}
-	}
-
-	private ArrayList<String> getSynset(IDictionary dictionary, String word,
+	private ArrayList<String> getSynsets(IDictionary dictionary, String word,
 			POS pos) {
 		ArrayList<String> allSynsets = new ArrayList<>();
 		IIndexWord indexWord = dictionary.getIndexWord(word, pos);
@@ -323,13 +311,6 @@ public class FeaturesExtractor {
 		return null;
 	}
 
-	/**
-	 * Check if a given word contains an invalid POS tag
-	 * 
-	 * @param aWord
-	 *            word to check
-	 * @return true if word contains a stop word tag, false otherwise
-	 */
 	private boolean isStopWord(String aWord) {
 		return stopwords.contains(aWord);
 	}

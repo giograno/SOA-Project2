@@ -55,7 +55,7 @@ public class PDFExtractor {
 	 * @param document
 	 * @return
 	 */
-	private static String processingText(String document) {
+	public static String processingText(String document) {
 		StringBuilder sBuilder = new StringBuilder();
 		try {
 			List<String> stopWords = FileUtils.readLines(new File(STOP_WORDS));

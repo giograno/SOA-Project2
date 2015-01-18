@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 import parsing.PDFFile;
 import parsing.SimonePDFParser;
 import utils.Utils;
+import wordnet.WordNetUtilities;
 
 public class SequentialTFIDF {
 
@@ -24,10 +25,11 @@ public class SequentialTFIDF {
 		final String OUTPUT_DIR = args[1];
 
 		Utils.cleanOrCreateDirectory(OUTPUT_DIR);
-		
-		DocumentFeatures documentFeatures = new TFIDF(INPUT_DIR, OUTPUT_DIR);
 
-		documentFeatures.extractFeatures();
+		Feature feature = new TermFrequencyInverseDocumentFrequency(INPUT_DIR,
+				OUTPUT_DIR);
+
+		feature.extractFeatures();
 		System.out.println("FINISH!!!!!!!!");
 
 		// String input = "onlyThis";
@@ -53,6 +55,9 @@ public class SequentialTFIDF {
 		// e.printStackTrace();
 		// }
 		// }
+
+//		System.out.println(WordNetUtilities.getBestPos("runs"));
+//		System.out.println(WordNetUtilities.isInVocabulary("runs"));
 
 	}
 }
