@@ -1,3 +1,4 @@
+package extractor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,12 +9,12 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.LetterTokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 public class PDFExtractor {
@@ -39,6 +40,13 @@ public class PDFExtractor {
 			pdDocument = parser.getPDDocument();
 			pdfTextStripper = new PDFTextStripper();
 			extractText = pdfTextStripper.getText(pdDocument);
+			
+//			PDDocumentInformation information = pdDocument
+//					.getDocumentInformation();
+//			if (information.getAuthor() != null) {
+//				System.out.println(information.getAuthor());
+//			}
+			
 			pdDocument.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -48,13 +56,7 @@ public class PDFExtractor {
 
 		return processingText(extractText);
 	}
-
-	/**
-	 * Perform stop word removing and tokenization on text extracted
-	 * 
-	 * @param document
-	 * @return
-	 */
+	
 	public static String processingText(String document) {
 		StringBuilder sBuilder = new StringBuilder();
 		try {

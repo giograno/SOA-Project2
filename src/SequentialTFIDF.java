@@ -1,21 +1,12 @@
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.tika.exception.TikaException;
-import org.clapper.util.misc.ObjectExistsException;
-import org.clapper.util.misc.VersionMismatchException;
-import org.xml.sax.SAXException;
-
-import parsing.PDFFile;
-import parsing.SimonePDFParser;
+import feature.Feature;
+import feature.TermFrequencyInverseDocumentFrequency;
 import utils.Utils;
-import wordnet.WordNetUtilities;
 
 public class SequentialTFIDF {
 
 	public static void main(String[] args) {
+
+		final long startTime = System.currentTimeMillis();
 
 		if (args.length != 2) {
 			System.err
@@ -30,34 +21,8 @@ public class SequentialTFIDF {
 				OUTPUT_DIR);
 
 		feature.extractFeatures();
-		System.out.println("FINISH!!!!!!!!");
-
-		// String input = "onlyThis";
-		// File[] input_files = new File(input).listFiles(new FilenameFilter() {
-		// public boolean accept(File dir, String name) {
-		// if (name.endsWith(".pdf"))
-		// return true;
-		// else
-		// return false;
-		// }
-		// });
-		//
-		// SimonePDFParser parser = new SimonePDFParser();
-		// for (File file : input_files) {
-		// try {
-		// PDFFile pFile = parser.parse(file);
-		// System.out.println("----------METADATA---------");
-		// System.out.println(pFile.getMetadata());
-		// System.out.println("----------CONTENT---------");
-		// System.out.println(pFile.getContent());
-		// } catch (Exception e) {
-		// System.err.println("General Exception");
-		// e.printStackTrace();
-		// }
-		// }
-
-//		System.out.println(WordNetUtilities.getBestPos("runs"));
-//		System.out.println(WordNetUtilities.isInVocabulary("runs"));
-
+		
+		final long endTime = System.currentTimeMillis();
+		System.out.println("Total execution time: " + (endTime - startTime));
 	}
 }

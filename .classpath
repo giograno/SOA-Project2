@@ -10,7 +10,6 @@
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/fontbox-1.8.5.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/lucene-analyzers-common-4.10.2.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/lucene-core-4.10.2.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/pdfbox-1.8.2.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/rita.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/rita.support.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/commons-logging-1.2.jar">
@@ -34,5 +33,10 @@
 	<classpathentry kind="lib" path="lib/simone/httpclient-cache-4.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/simone/httpcore-4.2.4.jar"/>
 	<classpathentry kind="lib" path="lib/simone/tika-app-1.4.jar"/>
+	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/pdfbox-1.8.8.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/Users/giograno/Documents/workspace/SOA-Project%202/lib/pdfbox-1.8.8-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

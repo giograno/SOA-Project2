@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
+import utils.filter.PDFFilter;
+import utils.filter.SerializedFilter;
+
 public class Utils {
 
 	public static File[] listPDFinDirectory(String directory) {

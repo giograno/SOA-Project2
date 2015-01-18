@@ -1,3 +1,4 @@
+package feature;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,13 +10,10 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
-
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import parsing.PDFFile;
-import parsing.SimonePDFParser;
+import utils.Constants;
 import utils.Utils;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import extractor.PDFExtractor;
 
 public class TermFrequencyInverseDocumentFrequency implements Feature {
 
@@ -48,7 +46,6 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 
 		/* FASE 1: scrittura classi serializzabili */
 		DocumentVector documentVector = null;
-		SimonePDFParser simoneParser = new SimonePDFParser();
 
 		for (File file : input_files) {
 			nameDocument = file.getName().substring(0,
@@ -56,24 +53,12 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 			System.out.println("Extraction from: " + nameDocument);
 			extractor = new FeaturesExtractor(nameDocument, tagger);
 
-			/* APACHE TIKA */
-
 			try {
-				PDFFile pFile = simoneParser.parse(file);
-				documentVector = extractor.getDocumentVectorV2(PDFExtractor
-						.processingText(pFile.getContent()));
-			} catch (IOException | SAXException | TikaException e1) {
-				e1.printStackTrace();
+				documentVector = extractor.getDocumentVector(PDFExtractor
+						.extractTextFromPDFDocument(file));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-
-			/* PDFBOX */
-
-			// try {
-			// documentVector = extractor.getDocumentVector(PDFExtractor
-			// .extractTextFromPDFDocument(file));
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
 
 			writeSerializedObjectOnFile(documentVector, nameDocument);
 			documentInCorpus++;
@@ -107,15 +92,41 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 			termFrequency = documentVector.getTermFrequency();
 			numberOfWordInDocument = documentVector.getNumberOfWordInDocument();
 
-			for (String string : termFrequency.keySet()) {
-				System.out.println(string + ": " + termFrequency.get(string));
-				double tf = (double) termFrequency.get(string)
-						/ (double) numberOfWordInDocument;
-				double idf = (double) documentInCorpus
-						/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-								.get(string);
-				double tfidf = tf * Math.log10(idf);
-				termFrequencyInverseDocumentFrequency.put(string, tfidf);
+			if (Constants.CUT_ON_TOTAL_DOC) {
+				int lowerLimit = (int) Math.round(Constants.LOWER_LIMIT
+						* documentInCorpus / 100);
+				int upperLimit = (int) Math.round(Constants.UPPER_LIMIT
+						* documentInCorpus / 100);
+				
+				for (String string : termFrequency.keySet()) {
+					if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+							.get(string) > lowerLimit
+							&& NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+									.get(string) < upperLimit) {
+
+						double tf = (double) termFrequency.get(string)
+								/ (double) numberOfWordInDocument;
+						double idf = (double) documentInCorpus
+								/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+										.get(string);
+						double tfidf = tf * Math.log10(idf);
+						termFrequencyInverseDocumentFrequency
+								.put(string, tfidf);
+					}
+				}
+			} else {
+
+				for (String string : termFrequency.keySet()) {
+
+					double tf = (double) termFrequency.get(string)
+							/ (double) numberOfWordInDocument;
+					double idf = (double) documentInCorpus
+							/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+									.get(string);
+					double tfidf = tf * Math.log10(idf);
+					termFrequencyInverseDocumentFrequency.put(string, tfidf);
+
+				}
 			}
 
 			try {
