@@ -1,4 +1,5 @@
 package feature;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -97,7 +98,7 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 						* documentInCorpus / 100);
 				int upperLimit = (int) Math.round(Constants.UPPER_LIMIT
 						* documentInCorpus / 100);
-				
+
 				for (String string : termFrequency.keySet()) {
 					if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
 							.get(string) > lowerLimit
@@ -115,7 +116,7 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 					}
 				}
 			} else {
-
+				
 				for (String string : termFrequency.keySet()) {
 
 					double tf = (double) termFrequency.get(string)
@@ -123,6 +124,8 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 					double idf = (double) documentInCorpus
 							/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
 									.get(string);
+					System.out.println(NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+									.get(string));
 					double tfidf = tf * Math.log10(idf);
 					termFrequencyInverseDocumentFrequency.put(string, tfidf);
 

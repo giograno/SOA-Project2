@@ -1,4 +1,5 @@
 package feature;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -89,12 +90,15 @@ public class FeaturesExtractor {
 						if (this.termFrequency.containsKey(string)) {
 							this.termFrequency.put(string,
 									this.termFrequency.get(string) + 1);
+							totalNumberOfWordsInDocument++;
+
 						} else {
 							this.termFrequency.put(string, 1);
+							NumberOfDocumentsWhereWordAppears
+									.updateNumberOfDocumentsWhereWordAppears(string);
+							totalNumberOfWordsInDocument++;
+
 						}
-						totalNumberOfWordsInDocument++;
-						NumberOfDocumentsWhereWordAppears
-								.updateNumberOfDocumentsWhereWordAppears(string);
 					}
 				}
 

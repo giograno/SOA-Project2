@@ -10,5 +10,5 @@ public class Constants {
 	// maximum number of synonyms for each word
 	public final static int MAXIMUM_SYNSETS_NUMBER = 1;
 	// cut based on frequency threshold all over documents corpus
-	public final static boolean CUT_ON_TOTAL_DOC = true;
+	public final static boolean CUT_ON_TOTAL_DOC = false;
 }
