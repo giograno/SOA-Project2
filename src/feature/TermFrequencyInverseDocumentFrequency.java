@@ -19,14 +19,16 @@ import extractor.PDFExtractor;
 public class TermFrequencyInverseDocumentFrequency implements Feature {
 
 	private String input_directory_path;
-	private String output_file_path;
+	private String output_tfidf_path;
+	private String output_tf_path;
 	private final String INTERMEDIATE_DIR_PATH = "intermediate_document_vectors";
 	private MaxentTagger tagger = null;
 
 	public TermFrequencyInverseDocumentFrequency(String input_directory_path,
 			String output_file_path) {
 		this.input_directory_path = input_directory_path;
-		this.output_file_path = output_file_path + "/output.txt";
+		this.output_tfidf_path = output_file_path + "/TFIDF.txt";
+		this.output_tf_path = output_file_path + "/TF.txt";
 		Utils.cleanOrCreateDirectory(this.INTERMEDIATE_DIR_PATH);
 		try {
 			tagger = new MaxentTagger("taggers/left3words-wsj-0-18.tagger");
@@ -65,10 +67,6 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 			documentInCorpus++;
 		}
 
-		Map<String, Double> termFrequencyInverseDocumentFrequency;
-		Map<String, Integer> termFrequency;
-		int numberOfWordInDocument;
-
 		File[] temporary_files = Utils
 				.listSerializedInDirectory(INTERMEDIATE_DIR_PATH);
 
@@ -89,63 +87,123 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 				e.printStackTrace();
 			}
 
-			termFrequencyInverseDocumentFrequency = new HashMap<>();
-			termFrequency = documentVector.getTermFrequency();
-			numberOfWordInDocument = documentVector.getNumberOfWordInDocument();
+			calculateTFIDF(documentVector, documentInCorpus, documentIndex);
+			documentIndex = 1;
+			calculateTF(documentVector, documentInCorpus, documentIndex);
+		}
+	}
 
-			if (Constants.CUT_ON_TOTAL_DOC) {
-				int lowerLimit = (int) Math.round(Constants.LOWER_LIMIT
-						* documentInCorpus / 100);
-				int upperLimit = (int) Math.round(Constants.UPPER_LIMIT
-						* documentInCorpus / 100);
+	private void calculateTFIDF(DocumentVector documentVector,
+			int documentInCorpus, int documentIndex) {
 
-				for (String string : termFrequency.keySet()) {
-					if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-							.get(string) > lowerLimit
-							&& NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-									.get(string) < upperLimit) {
+		Map<String, Double> termFrequencyInverseDocumentFrequency = new HashMap<>();
 
-						double tf = (double) termFrequency.get(string)
-								/ (double) numberOfWordInDocument;
-						double idf = (double) documentInCorpus
-								/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-										.get(string);
-						double tfidf = tf * Math.log10(idf);
-						termFrequencyInverseDocumentFrequency
-								.put(string, tfidf);
-					}
-				}
+		Map<String, Integer> termFrequency = documentVector.getTermFrequency();
+		Map<String, Integer> conceptFrequency = documentVector
+				.getConceptFrequency();
+		int numberOfWordInDocument = documentVector.getTotalNumberOfWord();
+
+		int lowerLimit = (int) Math.round(Constants.LOWER_LIMIT
+				* documentInCorpus / 100);
+		int upperLimit = (int) Math.round(Constants.UPPER_LIMIT
+				* documentInCorpus / 100);
+
+		/* FOR WORDS */
+		for (String string : termFrequency.keySet()) {
+			if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+					.get(string) > lowerLimit
+					&& NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+							.get(string) < upperLimit) {
+
+				double tf = (double) termFrequency.get(string)
+						/ (double) numberOfWordInDocument;
+				double idf = (double) documentInCorpus
+						/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+								.get(string);
+				double tfidf = tf * Math.log10(idf);
+				termFrequencyInverseDocumentFrequency.put(string, tfidf);
 			} else {
-
-				for (String string : termFrequency.keySet()) {
-
-					double tf = (double) termFrequency.get(string)
-							/ (double) numberOfWordInDocument;
-					double idf = (double) documentInCorpus
-							/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-									.get(string);
-					double tfidf = tf * Math.log10(idf);
-					termFrequencyInverseDocumentFrequency.put(string, tfidf);
-				}
+				numberOfWordInDocument--;
 			}
+		}
 
-			try {
-				writeFeaturesOnFile(documentVector,
-						termFrequencyInverseDocumentFrequency, documentIndex);
-				documentIndex++;
-			} catch (IOException e) {
-				System.err.println("You have a problem on saving files!");
-				e.printStackTrace();
-			}
+		/* FOR CONCEPTS */
+		for (String string : conceptFrequency.keySet()) {
+			if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereConceptAppears
+					.get(string) > lowerLimit
+					&& NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereConceptAppears
+							.get(string) < upperLimit) {
 
-			try {
-				writeAllTermsOnFile(NumberOfDocumentsWhereWordAppears
-						.getNumberOfDocumentsWhereWordAppears());
-			} catch (IOException e) {
-				System.err
-						.println("Some problems on saving all words on file!");
-				e.printStackTrace();
+				double tf = (double) conceptFrequency.get(string)
+						/ (double) numberOfWordInDocument;
+				double idf = (double) documentInCorpus
+						/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereConceptAppears
+								.get(string);
+				double tfidf = tf * Math.log10(idf);
+				termFrequencyInverseDocumentFrequency.put(string, tfidf);
+			} else {
+				numberOfWordInDocument--;
 			}
+		}
+
+		try {
+			writeFeaturesOnFile(documentVector,
+					termFrequencyInverseDocumentFrequency, documentIndex,
+					this.output_tfidf_path);
+			documentIndex++;
+		} catch (IOException e) {
+			System.err.println("You have a problem on saving files!");
+			e.printStackTrace();
+		}
+
+		try {
+			writeAllTermsOnFile(
+					NumberOfDocumentsWhereWordAppears
+							.getNumberOfDocumentsWhereWordAppears(),
+					NumberOfDocumentsWhereWordAppears
+							.getNumberOfDocumentsWhereConceptAppears());
+		} catch (IOException e) {
+			System.err.println("Some problems on saving all words on file!");
+			e.printStackTrace();
+		}
+	}
+
+	private void calculateTF(DocumentVector documentVector,
+			int documentInCorpus, int documentIndex) {
+
+		Map<String, Double> termFrequencyFeature = new HashMap<>();
+
+		Map<String, Integer> termFrequency = documentVector.getTermFrequency();
+
+		int numberOfWordInDocument = documentVector.getNumberOfWordInDocument();
+
+		int lowerLimit = (int) Math.round(Constants.LOWER_LIMIT
+				* documentInCorpus / 100);
+		int upperLimit = (int) Math.round(Constants.UPPER_LIMIT
+				* documentInCorpus / 100);
+
+		/* FOR WORDS */
+		for (String string : termFrequency.keySet()) {
+			if (NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+					.get(string) > lowerLimit
+					&& NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
+							.get(string) < upperLimit) {
+
+				double tf = (double) termFrequency.get(string)
+						/ (double) numberOfWordInDocument;
+				termFrequencyFeature.put(string, tf);
+			} else {
+				numberOfWordInDocument--;
+			}
+		}
+
+		try {
+			writeFeaturesOnFile(documentVector, termFrequencyFeature,
+					documentIndex, this.output_tf_path);
+			documentIndex++;
+		} catch (IOException e) {
+			System.err.println("You have a problem on saving files!");
+			e.printStackTrace();
 		}
 	}
 
@@ -166,8 +224,8 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 
 	private void writeFeaturesOnFile(DocumentVector pDocumentVector,
 			Map<String, Double> pTermFrequencyInverseDocumentFrequency,
-			int documentIndex) throws IOException {
-		File outputFile = new File(this.output_file_path);
+			int documentIndex, String outputPath) throws IOException {
+		File outputFile = new File(outputPath);
 
 		FileWriter fileWriter = new FileWriter(outputFile, true);
 
@@ -183,13 +241,16 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 		bufferedWriter.close();
 	}
 
-	private void writeAllTermsOnFile(Map<String, Integer> frequencyMap)
-			throws IOException {
+	private void writeAllTermsOnFile(Map<String, Integer> frequencyMap,
+			Map<String, Integer> conceptMap) throws IOException {
 		File outputFile = new File("output/allWords.txt");
 		FileWriter fileWriter = new FileWriter(outputFile, true);
 
 		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 		for (String word : frequencyMap.keySet()) {
+			bufferedWriter.write(word + "\n");
+		}
+		for (String word : conceptMap.keySet()) {
 			bufferedWriter.write(word + "\n");
 		}
 		bufferedWriter.close();

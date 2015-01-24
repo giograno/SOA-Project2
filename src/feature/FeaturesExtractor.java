@@ -30,12 +30,14 @@ public class FeaturesExtractor {
 
 	private String documentName;
 	private int totalNumberOfWordsInDocument = 0;
+	private int totalNumberOfConceptsInDocument = 0;
 
 	private Morphology morphology = new Morphology();
 	private MaxentTagger tagger;
 	private final String WORDNET_PATH = "Wordnet-3/dict";
 
-	private Map<String, Integer> termFrequency = new HashMap<>();;
+	private Map<String, Integer> termFrequency = new HashMap<>();
+	private Map<String, Integer> conceptFrequency = new HashMap<>();
 
 	public FeaturesExtractor(String pDocumentName, MaxentTagger tagger) {
 
@@ -87,16 +89,16 @@ public class FeaturesExtractor {
 						getPos(pos));
 				if (wordSynset != null) {
 					for (String string : wordSynset) {
-						if (this.termFrequency.containsKey(string)) {
-							this.termFrequency.put(string,
-									this.termFrequency.get(string) + 1);
-							totalNumberOfWordsInDocument++;
+						if (this.conceptFrequency.containsKey(string)) {
+							this.conceptFrequency.put(string,
+									this.conceptFrequency.get(string) + 1);
+							totalNumberOfConceptsInDocument++;
 
 						} else {
-							this.termFrequency.put(string, 1);
+							this.conceptFrequency.put(string, 1);
 							NumberOfDocumentsWhereWordAppears
-									.updateNumberOfDocumentsWhereWordAppears(string);
-							totalNumberOfWordsInDocument++;
+									.updateNumberOfDocumentsWhereConceptAppears(string);
+							totalNumberOfConceptsInDocument++;
 
 						}
 					}
@@ -106,8 +108,10 @@ public class FeaturesExtractor {
 		}
 
 		if (Constants.CUT_ON_FREQUENCY) {
+			int totalWordsAndConcepts = totalNumberOfConceptsInDocument
+					+ totalNumberOfWordsInDocument;
 			int threshold = (int) Math.round(Constants.LOWER_LIMIT
-					* totalNumberOfWordsInDocument / 100);
+					* totalWordsAndConcepts / 100);
 			for (Iterator<Map.Entry<String, Integer>> iterator = this.termFrequency
 					.entrySet().iterator(); iterator.hasNext();) {
 
@@ -120,11 +124,28 @@ public class FeaturesExtractor {
 							.removeWordFromDocumentCorpus(entry.getKey());
 				}
 			}
+
+			/* FOR CONCEPTS */
+
+			for (Iterator<Map.Entry<String, Integer>> iterator = this.conceptFrequency
+					.entrySet().iterator(); iterator.hasNext();) {
+
+				Map.Entry<String, Integer> entry = iterator.next();
+
+				if (entry.getValue() < threshold) {
+					iterator.remove();
+
+					NumberOfDocumentsWhereWordAppears
+							.removeConceptFromDocumentCorpus(entry.getKey());
+				}
+			}
+
 		}
 
 		dict.close();
 		return new DocumentVector(documentName, totalNumberOfWordsInDocument,
-				termFrequency);
+				totalNumberOfConceptsInDocument, termFrequency,
+				conceptFrequency);
 	}
 
 	private boolean isAscii(String string) {
