@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/javautil-3.1.1.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/stanford-postagger-2011-04-20.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/pdfbox-1.8.2.jar"/>
+	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/bcprov-jdk16-1.46.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

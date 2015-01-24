@@ -110,10 +110,14 @@ public class FeaturesExtractor {
 					* totalNumberOfWordsInDocument / 100);
 			for (Iterator<Map.Entry<String, Integer>> iterator = this.termFrequency
 					.entrySet().iterator(); iterator.hasNext();) {
+
 				Map.Entry<String, Integer> entry = iterator.next();
 
 				if (entry.getValue() < threshold) {
 					iterator.remove();
+
+					NumberOfDocumentsWhereWordAppears
+							.removeWordFromDocumentCorpus(entry.getKey());
 				}
 			}
 		}

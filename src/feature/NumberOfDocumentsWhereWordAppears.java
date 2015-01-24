@@ -5,11 +5,29 @@ import java.util.Map;
 
 public class NumberOfDocumentsWhereWordAppears {
 
-	static Map<String, Integer> numberOfDocumentsWhereWordAppears = new HashMap<String, Integer>();
+	public static Map<String, Integer> numberOfDocumentsWhereWordAppears = new HashMap<String, Integer>();
 
 	public static void updateNumberOfDocumentsWhereWordAppears(String word) {
-		int counter = numberOfDocumentsWhereWordAppears.containsKey(word) ? numberOfDocumentsWhereWordAppears
-				.get(word) : 0;
-		numberOfDocumentsWhereWordAppears.put(word, counter + 1);
+
+		if (numberOfDocumentsWhereWordAppears.containsKey(word)) {
+			int termFrequency = numberOfDocumentsWhereWordAppears.get(word);
+			numberOfDocumentsWhereWordAppears.put(word, termFrequency + 1);
+		} else {
+			numberOfDocumentsWhereWordAppears.put(word, 1);
+		}
 	}
+
+	public static void removeWordFromDocumentCorpus(String word) {
+		if (numberOfDocumentsWhereWordAppears.get(word) == 1) {
+			numberOfDocumentsWhereWordAppears.remove(word);
+		} else {
+			int termFrequency = numberOfDocumentsWhereWordAppears.get(word);
+			numberOfDocumentsWhereWordAppears.put(word, termFrequency - 1);
+		}
+	}
+
+	public static Map<String, Integer> getNumberOfDocumentsWhereWordAppears() {
+		return numberOfDocumentsWhereWordAppears;
+	}
+
 }

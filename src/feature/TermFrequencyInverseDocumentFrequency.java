@@ -116,7 +116,7 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 					}
 				}
 			} else {
-				
+
 				for (String string : termFrequency.keySet()) {
 
 					double tf = (double) termFrequency.get(string)
@@ -124,11 +124,8 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 					double idf = (double) documentInCorpus
 							/ (double) NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
 									.get(string);
-					System.out.println(NumberOfDocumentsWhereWordAppears.numberOfDocumentsWhereWordAppears
-									.get(string));
 					double tfidf = tf * Math.log10(idf);
 					termFrequencyInverseDocumentFrequency.put(string, tfidf);
-
 				}
 			}
 
@@ -138,6 +135,15 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 				documentIndex++;
 			} catch (IOException e) {
 				System.err.println("You have a problem on saving files!");
+				e.printStackTrace();
+			}
+
+			try {
+				writeAllTermsOnFile(NumberOfDocumentsWhereWordAppears
+						.getNumberOfDocumentsWhereWordAppears());
+			} catch (IOException e) {
+				System.err
+						.println("Some problems on saving all words on file!");
 				e.printStackTrace();
 			}
 		}
@@ -174,6 +180,18 @@ public class TermFrequencyInverseDocumentFrequency implements Feature {
 		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 		bufferedWriter.write(recordToWrite);
 		bufferedWriter.write("\n");
+		bufferedWriter.close();
+	}
+
+	private void writeAllTermsOnFile(Map<String, Integer> frequencyMap)
+			throws IOException {
+		File outputFile = new File("output/allWords.txt");
+		FileWriter fileWriter = new FileWriter(outputFile, true);
+
+		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		for (String word : frequencyMap.keySet()) {
+			bufferedWriter.write(word + "\n");
+		}
 		bufferedWriter.close();
 	}
 
