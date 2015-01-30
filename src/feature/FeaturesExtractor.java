@@ -15,18 +15,17 @@ import edu.mit.jwi.item.ISynset;
 import edu.mit.jwi.item.IWord;
 import edu.mit.jwi.item.IWordID;
 import edu.mit.jwi.item.POS;
-import edu.stanford.nlp.ling.WordLemmaTag;
 import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class FeaturesExtractor {
 
 	private HashSet<String> stopwords;
-	private static String[] s_stopwords = { "DT", "CD", "CC", "EX", "IN", "MD",
-			"PDT", "PRP", "PRP$", "RB", "RBR", "RBS", "RP", "POS", "SYM", "TO",
-			"UH", "WP", "WP$", "WRB", "WDT", "#", "$", "\"", "(", ")", ",",
-			".", ":", "''", "LRB", "RRB", "LCB", "RCB", "LSB", "RSB", "-LRB-",
-			"B-", "``", "FW", "-RRB-", " ", " " };
+	private static String[] s_stopwords = { "DT", "CD", "LS", "CC", "EX", "IN",
+			"MD", "PDT", "PRP", "PRP$", "RB", "RBR", "RBS", "RP", "POS", "SYM",
+			"TO", "UH", "WP", "WP$", "WRB", "WDT", "#", "$", "\"", "(", ")",
+			",", ".", ":", "''", "LRB", "RRB", "LCB", "RCB", "LSB", "RSB",
+			"-LRB-", "B-", "``", "FW", "-RRB-", " ", " " };
 
 	private String documentName;
 	private int totalNumberOfWordsInDocument = 0;
@@ -58,20 +57,20 @@ public class FeaturesExtractor {
 		document = tagger.tagString(document);
 
 		String[] splittedDocument = document.split(" ");
-
 		String originalWord, pos;
 
 		for (int i = 0; i < splittedDocument.length; i++) {
-			String[] temp = splittedDocument[i].split("/");
+
+			String[] temp = splittedDocument[i].split("_");
+
 			originalWord = temp[0];
 			pos = temp[1];
 
-			if (!isStopWord(pos) && isAscii(originalWord)) {
+			if (!isStopWord(pos)) {
 
-				WordLemmaTag lemma = morphology.lemmatize(morphology.stem(
-						originalWord, pos));
+				originalWord = morphology.stem(originalWord);
 
-				String stemmedWord = lemma.lemma().toLowerCase();
+				String stemmedWord = morphology.lemma(originalWord, pos, true);
 
 				if (termFrequency.containsKey(stemmedWord)) {
 					termFrequency.put(stemmedWord,
@@ -85,21 +84,23 @@ public class FeaturesExtractor {
 							.updateNumberOfDocumentsWhereWordAppears(stemmedWord);
 				}
 
-				ArrayList<String> wordSynset = getSynsets(dict, originalWord,
-						getPos(pos));
-				if (wordSynset != null) {
-					for (String string : wordSynset) {
-						if (this.conceptFrequency.containsKey(string)) {
-							this.conceptFrequency.put(string,
-									this.conceptFrequency.get(string) + 1);
-							totalNumberOfConceptsInDocument++;
+				// adding synonyms
+				if (Constants.CONCEPTS) {
+					ArrayList<String> wordSynset = getSynsets(dict,
+							stemmedWord, getPos(pos));
+					if (wordSynset != null) {
+						for (String string : wordSynset) {
+							if (this.conceptFrequency.containsKey(string)) {
+								this.conceptFrequency.put(string,
+										this.conceptFrequency.get(string) + 1);
+								totalNumberOfConceptsInDocument++;
 
-						} else {
-							this.conceptFrequency.put(string, 1);
-							NumberOfDocumentsWhereWordAppears
-									.updateNumberOfDocumentsWhereConceptAppears(string);
-							totalNumberOfConceptsInDocument++;
-
+							} else {
+								this.conceptFrequency.put(string, 1);
+								NumberOfDocumentsWhereWordAppears
+										.updateNumberOfDocumentsWhereWordAppears(string);
+								totalNumberOfConceptsInDocument++;
+							}
 						}
 					}
 				}
@@ -108,38 +109,8 @@ public class FeaturesExtractor {
 		}
 
 		if (Constants.CUT_ON_FREQUENCY) {
-			int totalWordsAndConcepts = totalNumberOfConceptsInDocument
-					+ totalNumberOfWordsInDocument;
-			int threshold = (int) Math.round(Constants.LOWER_LIMIT
-					* totalWordsAndConcepts / 100);
-			for (Iterator<Map.Entry<String, Integer>> iterator = this.termFrequency
-					.entrySet().iterator(); iterator.hasNext();) {
-
-				Map.Entry<String, Integer> entry = iterator.next();
-
-				if (entry.getValue() < threshold) {
-					iterator.remove();
-
-					NumberOfDocumentsWhereWordAppears
-							.removeWordFromDocumentCorpus(entry.getKey());
-				}
-			}
-
-			/* FOR CONCEPTS */
-
-			for (Iterator<Map.Entry<String, Integer>> iterator = this.conceptFrequency
-					.entrySet().iterator(); iterator.hasNext();) {
-
-				Map.Entry<String, Integer> entry = iterator.next();
-
-				if (entry.getValue() < threshold) {
-					iterator.remove();
-
-					NumberOfDocumentsWhereWordAppears
-							.removeConceptFromDocumentCorpus(entry.getKey());
-				}
-			}
-
+			cutOnThreshold(termFrequency, totalNumberOfWordsInDocument);
+			cutOnThreshold(conceptFrequency, totalNumberOfConceptsInDocument);
 		}
 
 		dict.close();
@@ -148,17 +119,21 @@ public class FeaturesExtractor {
 				conceptFrequency);
 	}
 
-	private boolean isAscii(String string) {
-		if (string == null) {
-			return false;
-		}
+	private void cutOnThreshold(Map<String, Integer> frequencyMap, int total) {
+		int threshold = (int) Math.round(Constants.LOWER_LIMIT * total / 100);
 
-		for (int i = 0; i < string.length(); i++) {
-			char ch = string.charAt(i);
-			if (ch < 32 || ch > 122)
-				return false;
+		for (Iterator<Map.Entry<String, Integer>> iterator = frequencyMap
+				.entrySet().iterator(); iterator.hasNext();) {
+
+			Map.Entry<String, Integer> entry = iterator.next();
+
+			if (entry.getValue() < threshold) {
+				iterator.remove();
+
+				NumberOfDocumentsWhereWordAppears
+						.removeWordFromDocumentCorpus(entry.getKey());
+			}
 		}
-		return true;
 	}
 
 	private ArrayList<String> getSynsets(IDictionary dictionary, String word,
@@ -176,7 +151,7 @@ public class FeaturesExtractor {
 			synsetSize = synset.getWords().size();
 			for (int i = 0; i < synsetSize
 					&& i < Constants.MAXIMUM_SYNSETS_NUMBER; i++) {
-				synonym = synset.getWords().get(i).getLemma();
+				synonym = synset.getWords().get(i).getLemma().toLowerCase();
 				if (!synonym.equals(word)) {
 					allSynsets.add(synonym);
 				}
@@ -197,7 +172,8 @@ public class FeaturesExtractor {
 		} else if (pos.equals("JJ") || pos.equals("JJR") || pos.equals("JJS")) {
 			return POS.ADJECTIVE;
 		}
-		return null;
+		System.out.println("Equivalent POS not found! Default POS.NOUN used!");
+		return POS.NOUN;
 	}
 
 	private boolean isStopWord(String aWord) {

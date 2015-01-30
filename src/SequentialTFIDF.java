@@ -1,5 +1,5 @@
 import feature.Feature;
-import feature.TermFrequencyInverseDocumentFrequency;
+import feature.TermFrequencyAndInverse;
 import utils.Utils;
 
 public class SequentialTFIDF {
@@ -17,7 +17,7 @@ public class SequentialTFIDF {
 
 		Utils.cleanOrCreateDirectory(OUTPUT_DIR);
 
-		Feature feature = new TermFrequencyInverseDocumentFrequency(INPUT_DIR,
+		Feature feature = new TermFrequencyAndInverse(INPUT_DIR,
 				OUTPUT_DIR);
 
 		feature.extractFeatures();

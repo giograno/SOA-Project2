@@ -1,8 +1,7 @@
 package extractor;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
@@ -14,72 +13,49 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.util.PDFTextStripper;
+
+import utils.Utils;
 
 public class PDFExtractor {
 	private static final String STOP_WORDS = "stop-word";
 
-	/**
-	 * Extract text from PDF file
-	 * 
-	 * @param pDocument
-	 *            PDF file
-	 * @return a String which contains text
-	 * @throws IOException
-	 */
 	public static String extractTextFromPDFDocument(File pDocument)
-			throws IOException {
+			throws Exception {
 		PDFTextStripper pdfTextStripper = null;
 		PDDocument pdDocument = null;
 		String extractText = null;
 
-		try {
-			PDFParser parser = new PDFParser(new FileInputStream(pDocument));
-			parser.parse();
-			pdDocument = parser.getPDDocument();
-			pdfTextStripper = new PDFTextStripper();
-			extractText = pdfTextStripper.getText(pdDocument);
-			
-//			PDDocumentInformation information = pdDocument
-//					.getDocumentInformation();
-//			if (information.getAuthor() != null) {
-//				System.out.println(information.getAuthor());
-//			}
-			
-			pdDocument.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		PDFParser parser = new PDFParser(new FileInputStream(pDocument));
+		parser.parse();
+		pdDocument = parser.getPDDocument();
+		pdfTextStripper = new PDFTextStripper();
+		extractText = pdfTextStripper.getText(pdDocument);
+		pdDocument.close();
 
 		return processingText(extractText);
 	}
-	
-	public static String processingText(String document) {
+
+	public static String processingText(String document) throws Exception {
 		StringBuilder sBuilder = new StringBuilder();
-		try {
-			List<String> stopWords = FileUtils.readLines(new File(STOP_WORDS));
-			CharArraySet stopWSet = new CharArraySet(stopWords, true);
 
-			TokenStream tokenStream = new LetterTokenizer(new StringReader(
-					document.trim()));
-			tokenStream = new StopFilter(tokenStream, stopWSet);
-//			tokenStream = new LowerCaseFilter(tokenStream);
+		List<String> stopWords = FileUtils.readLines(new File(STOP_WORDS));
+		CharArraySet stopWSet = new CharArraySet(stopWords, true);
 
-			CharTermAttribute charTermAttribute = tokenStream
-					.addAttribute(CharTermAttribute.class);
+		TokenStream tokenStream = new LetterTokenizer(new StringReader(
+				document.trim()));
+		tokenStream = new StopFilter(tokenStream, stopWSet);
 
-			tokenStream.reset();
-			while (tokenStream.incrementToken()) {
-				String string = charTermAttribute.toString();
+		CharTermAttribute charTermAttribute = tokenStream
+				.addAttribute(CharTermAttribute.class);
+
+		tokenStream.reset();
+		while (tokenStream.incrementToken()) {
+			String string = charTermAttribute.toString();
+			if (Utils.isAscii(string) && string.length() > 3)
 				sBuilder.append(string + " ");
-			}
-			tokenStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		tokenStream.close();
 
 		return sBuilder.toString();
 	}

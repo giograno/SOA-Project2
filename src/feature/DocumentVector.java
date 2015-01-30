@@ -57,8 +57,13 @@ public class DocumentVector implements Serializable {
 	public int getNumberOfWordInDocument() {
 		return numberOfWordInDocument;
 	}
-	
-	public int getNumberOfSynsetInDocument(){
+
+	/**
+	 * Get total number of synonyms in document
+	 * 
+	 * @return
+	 */
+	public int getNumberOfSynsetInDocument() {
 		return numberOfSynsetsInDocument;
 	}
 
@@ -71,10 +76,20 @@ public class DocumentVector implements Serializable {
 		return numberOfWordInDocument + numberOfSynsetsInDocument;
 	}
 
+	/**
+	 * Get occurrences for each term extracted
+	 * 
+	 * @return a Map with terms and their frequencies
+	 */
 	public Map<String, Integer> getTermFrequency() {
 		return termFrequency;
 	}
 
+	/**
+	 * Get occurrences for each synonym extracted
+	 * 
+	 * @return a Map with terms and their frequencies
+	 */
 	public Map<String, Integer> getConceptFrequency() {
 		return conceptFrequency;
 	}
