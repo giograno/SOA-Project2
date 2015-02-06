@@ -1,3 +1,6 @@
+
+import java.util.Properties;
+
 import feature.Feature;
 import feature.TermFrequencyAndInverse;
 import utils.Utils;
@@ -5,7 +8,7 @@ import utils.Utils;
 public class SequentialTFIDF {
 
 	public static void main(String[] args) {
-
+	
 		final long startTime = System.currentTimeMillis();
 
 		if (args.length != 2) {
@@ -23,6 +26,6 @@ public class SequentialTFIDF {
 		feature.extractFeatures();
 		
 		final long endTime = System.currentTimeMillis();
-		System.out.println("Total execution time: " + (endTime - startTime));
+		System.out.println("Total execution time: " + Math.round((endTime - startTime)/1000) + " seconds");
 	}
 }

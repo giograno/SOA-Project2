@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import utils.Constants;
+import edu.mit.jwi.Dictionary;
 import edu.mit.jwi.IDictionary;
 import edu.mit.jwi.item.IIndexWord;
 import edu.mit.jwi.item.ISynset;
@@ -33,7 +34,7 @@ public class FeaturesExtractor {
 
 	private Morphology morphology = new Morphology();
 	private MaxentTagger tagger;
-	private final String WORDNET_PATH = "Wordnet-3/dict";
+	private final String WORDNET_PATH = "WordNet-3/dict";
 
 	private Map<String, Integer> termFrequency = new HashMap<>();
 	private Map<String, Integer> conceptFrequency = new HashMap<>();
@@ -51,7 +52,7 @@ public class FeaturesExtractor {
 	public DocumentVector getDocumentVector(String document) throws IOException {
 
 		URL url = new URL("file", null, WORDNET_PATH);
-		IDictionary dict = new edu.mit.jwi.Dictionary(url);
+		IDictionary dict = new Dictionary(url);
 		dict.open();
 
 		document = tagger.tagString(document);
@@ -88,7 +89,8 @@ public class FeaturesExtractor {
 				if (Constants.CONCEPTS) {
 					ArrayList<String> wordSynset = getSynsets(dict,
 							stemmedWord, getPos(pos));
-					if (wordSynset != null) {
+					if (wordSynset != null && !wordSynset.isEmpty()) {
+
 						for (String string : wordSynset) {
 							if (this.conceptFrequency.containsKey(string)) {
 								this.conceptFrequency.put(string,
@@ -152,14 +154,12 @@ public class FeaturesExtractor {
 			for (int i = 0; i < synsetSize
 					&& i < Constants.MAXIMUM_SYNSETS_NUMBER; i++) {
 				synonym = synset.getWords().get(i).getLemma().toLowerCase();
-				if (!synonym.equals(word)) {
+				if (!synonym.equals(word) && synonym.length() > 3) {
 					allSynsets.add(synonym);
 				}
 			}
-			return allSynsets;
-		} else {
-			return null;
 		}
+		return allSynsets;
 	}
 
 	private POS getPos(String pos) {

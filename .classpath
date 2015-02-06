@@ -10,8 +10,6 @@
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/fontbox-1.8.5.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/lucene-analyzers-common-4.10.2.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/lucene-core-4.10.2.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/rita.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/rita.support.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/commons-logging-1.2.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/Users/giograno/Documents/workspace/SOA-Project%202/lib/commons-logging-1.2-javadoc.jar!/"/>
@@ -20,16 +18,12 @@
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/icu4j_3_4.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/iri.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/jena.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/kea-5.0.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/snowball.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/weka.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/kea/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/jwi-2.2.3.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/javautil-3.1.1.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/pdfbox-1.8.2.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/bcprov-jdk16-1.46.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/PDFxStream.jar"/>
-	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/stanford-postagger 2.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/stanford-postagger-3.5.0.jar"/>
 	<classpathentry kind="lib" path="/Users/giograno/Documents/workspace/SOA-Project 2/lib/stanford-postagger.jar"/>
 	<classpathentry kind="output" path="bin"/>

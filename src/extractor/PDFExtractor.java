@@ -22,6 +22,7 @@ public class PDFExtractor {
 
 	public static String extractTextFromPDFDocument(File pDocument)
 			throws Exception {
+		
 		PDFTextStripper pdfTextStripper = null;
 		PDDocument pdDocument = null;
 		String extractText = null;

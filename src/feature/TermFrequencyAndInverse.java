@@ -10,7 +10,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import utils.Constants;
 import utils.Utils;
@@ -38,7 +45,12 @@ public class TermFrequencyAndInverse implements Feature {
 	public void extractFeatures() {
 		FeaturesExtractor extractor = null;
 
-		File[] input_files = Utils.listPDFinDirectory(input_directory_path);
+		// File[] input_files = Utils.listPDFinDirectory(input_directory_path);
+
+		IOFileFilter filter = new SuffixFileFilter(new String("pdf"),
+				IOCase.INSENSITIVE);
+		Iterator<File> allFiles = FileUtils.iterateFiles(new File(
+				input_directory_path), filter, DirectoryFileFilter.DIRECTORY);
 
 		// Name of current document in analysis
 		String nameDocument;
@@ -48,9 +60,14 @@ public class TermFrequencyAndInverse implements Feature {
 		/* FASE 1: scrittura classi serializzabili */
 		DocumentVector documentVector = null;
 
-		for (File file : input_files) {
-			nameDocument = file.getName().substring(0,
-					file.getName().length() - 4);
+		while (allFiles.hasNext()) {
+			File file = (File) allFiles.next();
+//			String parentDirectory = file.getParentFile().getName();
+			// for (File file : input_files) {
+//			nameDocument = file.getName().substring(0,
+//					file.getName().length() - 4);
+			nameDocument = file.getParentFile().getName() + "-"
+					+ file.getName().substring(0, file.getName().length() - 4);
 			System.out.println("Extraction from: " + nameDocument);
 			extractor = new FeaturesExtractor(nameDocument, tagger);
 
@@ -66,7 +83,8 @@ public class TermFrequencyAndInverse implements Feature {
 				writeSerializedObjectOnFile(documentVector, nameDocument);
 				documentInCorpus++;
 			} catch (Exception e) {
-				System.err.println("An ecception occurred on PDF extraction");
+				e.printStackTrace();
+//				System.err.println("An ecception occurred on PDF extraction");
 				continue;
 			}
 		}
